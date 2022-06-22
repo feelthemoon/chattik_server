@@ -24,11 +24,17 @@ export class AuthenticationService {
 
   async signin(signDto: SigninDto): Promise<Tokens> {
     const user = await this.usersService.findBy('email', signDto.email, true);
+    if (!user) {
+      throw new HttpException(
+        { message: [{type: 'invalid_data', text: 'Invalid email or password'}] },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     const isPasswordCompared = await compare(signDto.password, user.password);
 
-    if (!user || !isPasswordCompared) {
+    if (!isPasswordCompared) {
       throw new HttpException(
-        { message: ['Invalid email or password'] },
+        { message: [{type: 'invalid_data', text: 'Invalid email or password'}] },
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -46,13 +52,13 @@ export class AuthenticationService {
       'email',
       signupDto.email,
     );
-    if (isEmailInUse) existingErrors.push('Email already in use');
+    if (isEmailInUse) existingErrors.push({ type: 'invalid_data_email', text: 'Email already in use' });
 
     const isUsernameInUse = await this.usersService.findBy(
       'username',
       signupDto.username,
     );
-    if (isUsernameInUse) existingErrors.push('Username already in use');
+    if (isUsernameInUse) existingErrors.push({ type:'invalid_data_username', text: 'Username already in use' });
 
     if (existingErrors.length)
       throw new HttpException(
