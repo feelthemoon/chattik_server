@@ -28,7 +28,7 @@ export class AuthenticationController {
   @Post('signin')
   async signin(@Body() signinDto: SigninDto, @Res() response: Response) {
     const tokens = await this.authenticationService.signin(signinDto);
-    response.cookie('refresh_token', tokens.refresh_token);
+    response.setHeader('Set-Cookie', `Refresh=${tokens.refresh_token}; HttpOnly; Path=/; Max-Age=10d`);
     response.setHeader('Access-Control-Expose-Headers', 'Authorization');
     response.setHeader('Authorization', `Bearer ${tokens.access_token}`);
     response.send();
@@ -39,7 +39,7 @@ export class AuthenticationController {
   @Post('signup')
   async signup(@Body() signupDto: SignupDto, @Res() response: Response) {
     const tokens = await this.authenticationService.signup(signupDto);
-    response.cookie('refresh_token', tokens.refresh_token);
+    response.setHeader('Set-Cookie', `Refresh=${tokens.refresh_token}; HttpOnly; Path=/; Max-Age=10d`);
     response.setHeader('Access-Control-Expose-Headers', 'Authorization');
     response.setHeader('Authorization', `Bearer ${tokens.access_token}`);
     response.send();
@@ -68,7 +68,7 @@ export class AuthenticationController {
   ) {
     const accessToken = await this.authenticationService.refreshToken(
       userId,
-      request.cookies['refresh_token'],
+      request.cookies['Refresh'],
     );
     response.send({ type: 'Bearer', token: accessToken });
   }
