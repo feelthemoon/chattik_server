@@ -1,18 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from '../../entities';
 import { SignupDto } from '../authentication/authentication.dto';
-import { Repository, UpdateResult } from 'typeorm';
-
-type FindFieldType = 'email' | 'id' | 'username';
-type UpdateFieldType =
-  | 'username'
-  | 'password'
-  | 'email'
-  | 'refresh_hash'
-  | 'name'
-  | 'avatar';
-type AddSelectType = 'password' | 'refresh_hash';
+import { Repository } from 'typeorm';
+import { hash } from 'bcrypt';
+import { AddSelectType, FindFieldType, UpdateFieldType } from './types';
 
 @Injectable()
 export class UsersService {
@@ -40,18 +32,29 @@ export class UsersService {
     return this.usersRepository.findOneBy({ [field]: value });
   }
 
-  updateOne(
+  async updateOne(
     id: number,
     updatedFiled: UpdateFieldType,
     value: string,
-  ): Promise<UpdateResult | null> {
-    return this.usersRepository.update({ id }, { [updatedFiled]: value });
+  ): Promise<UsersEntity | null> {
+    const user = await this.findBy('id', id);
+    if (!user) {
+      throw new NotFoundException({ message: [{ type: 'common_error', text: 'User not found' }] });
+    }
+    if (updatedFiled === 'password') {
+      user.password = await hash(value, 10);
+      return this.usersRepository.save(user);
+    }
+    user[updatedFiled] = value;
+    return this.usersRepository.save(user);
   }
 
-  updateConfirmed(
-    id: number,
-    isConfirmed: boolean,
-  ): Promise<UpdateResult | null> {
-    return this.usersRepository.update({ id }, { confirmed: isConfirmed });
+  async updateConfirmed(id: number, isConfirmed: boolean): Promise<UsersEntity | null> {
+    const user = await this.findBy('id', id);
+    if (!user) {
+      throw new NotFoundException({ message: [{ type: 'common_error', text: 'User not found' }] });
+    }
+    user.confirmed = isConfirmed;
+    return this.usersRepository.save(user);
   }
 }

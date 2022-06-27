@@ -3,11 +3,12 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersEntity } from '../../entities';
+import { RecoverTokenStrategy } from '../authentication/strategies';
 
 @Module({
   imports: [TypeOrmModule.forFeature([UsersEntity])],
-  providers: [UsersService],
+  providers: [UsersService, RecoverTokenStrategy],
   controllers: [UsersController],
-  exports: [UsersService],
+  exports: [UsersService, RecoverTokenStrategy],
 })
 export class UsersModule {}

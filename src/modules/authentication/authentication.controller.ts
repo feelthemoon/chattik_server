@@ -13,11 +13,11 @@ import {
   Query,
   UseFilters,
 } from '@nestjs/common';
-import { GetCurrentUserId, Public } from '../../common/decorators';
+import { GetCurrentUserIdFromRefreshToken, Public } from '../../common/decorators';
 import { Request, Response } from 'express';
 import { SigninDto, SignupDto } from './authentication.dto';
 import { AuthenticationService } from './authentication.service';
-import { RtGuard } from '../../common/guards';
+import { RtGuard, VerifyTokenGuard } from '../../common/guards';
 import { AtGuard } from '../../common/guards';
 import { TokenExceptionFilter } from '../../common/filters';
 import { HttpExceptionFilter } from '../../common/filters';
@@ -56,11 +56,11 @@ export class AuthenticationController {
     response.send();
   }
 
-  @HttpCode(HttpStatus.OK)
   @UseGuards(RtGuard, AtGuard)
+  @HttpCode(HttpStatus.OK)
   @Post('logout')
   async logout(
-    @GetCurrentUserId() userId: number,
+    @GetCurrentUserIdFromRefreshToken() userId: number,
     @Headers('authorization') reqHeaders,
     @Res() response: Response,
   ) {
@@ -68,12 +68,12 @@ export class AuthenticationController {
     response.send();
   }
 
+  @UseGuards(RtGuard)
   @Public()
   @Post('refresh')
-  @UseGuards(RtGuard)
   @HttpCode(HttpStatus.OK)
   async refreshTokens(
-    @GetCurrentUserId() userId: number,
+    @GetCurrentUserIdFromRefreshToken() userId: number,
     @Req() request: Request,
     @Res() response: Response,
   ) {
@@ -85,10 +85,19 @@ export class AuthenticationController {
   }
 
   @Public()
+  @UseGuards(VerifyTokenGuard)
   @Post('verify')
   @HttpCode(HttpStatus.OK)
   async verifyUser(@Query('token') token: string, @Res() response: Response) {
-    const updatedUser = await this.authenticationService.verifyUser(token);
-    response.send(updatedUser);
+    const user = await this.authenticationService.verifyUser(token);
+    response.send(user);
+  }
+
+  @Public()
+  @Post('recover')
+  @HttpCode(HttpStatus.OK)
+  async recoverPassword(@Body() reqBody: { email: string }, @Res() response: Response) {
+    await this.authenticationService.sendUserRecoverPasswordLink(reqBody.email);
+    response.send();
   }
 }

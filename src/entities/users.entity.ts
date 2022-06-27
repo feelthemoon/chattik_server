@@ -1,9 +1,4 @@
-import {
-  Column,
-  PrimaryGeneratedColumn,
-  Entity,
-  CreateDateColumn,
-} from 'typeorm';
+import { Column, PrimaryGeneratedColumn, Entity, CreateDateColumn } from 'typeorm';
 import { Exclude } from 'class-transformer';
 
 @Entity('users')

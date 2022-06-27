@@ -24,11 +24,7 @@ export class AuthenticationService {
   ) {}
 
   async signin(signDto: SigninDto): Promise<Tokens> {
-    const user = await this.usersService.findBy(
-      'email',
-      signDto.email,
-      'password',
-    );
+    const user = await this.usersService.findBy('email', signDto.email, 'password');
     if (!user) {
       throw new BadRequestException({
         message: [{ type: 'invalid_data', text: 'Invalid email or password' }],
@@ -51,28 +47,21 @@ export class AuthenticationService {
   async signup(signupDto: SignupDto): Promise<Tokens> {
     const existingErrors = [];
 
-    const isEmailInUse = await this.usersService.findBy(
-      'email',
-      signupDto.email,
-    );
+    const isEmailInUse = await this.usersService.findBy('email', signupDto.email);
     if (isEmailInUse)
       existingErrors.push({
         type: 'invalid_data_email',
         text: 'Email already in use',
       });
 
-    const isUsernameInUse = await this.usersService.findBy(
-      'username',
-      signupDto.username,
-    );
+    const isUsernameInUse = await this.usersService.findBy('username', signupDto.username);
     if (isUsernameInUse)
       existingErrors.push({
         type: 'invalid_data_username',
         text: 'Username already in use',
       });
 
-    if (existingErrors.length)
-      throw new BadRequestException({ message: existingErrors });
+    if (existingErrors.length) throw new BadRequestException({ message: existingErrors });
 
     const hashPassword = await hash(signupDto.password, 10);
 
@@ -84,6 +73,15 @@ export class AuthenticationService {
     const tokens = await this.getTokens(user.id);
     const refreshHash = await hash(tokens.refresh_token, 10);
     await this.usersService.updateOne(user.id, 'refresh_hash', refreshHash);
+
+    const verifyToken = this.jwtService.sign(
+      { sub: user.id },
+      {
+        secret: this.config.get<string>('VERIFY_TOKEN_SECRET'),
+        expiresIn: this.config.get<string>('VERIFY_TOKEN_EXPIRATION'),
+      },
+    );
+
     await this.mailService.sendEmail({
       name: 'verify.hbs',
       data: {
@@ -91,9 +89,7 @@ export class AuthenticationService {
         subject: 'Verify account',
         context: {
           text: 'Confirm your registration by verifying your account',
-          link: `${this.config.get<string>('CLIENT_URL')}/im?token=${
-            tokens.access_token
-          }`,
+          link: `${this.config.get<string>('CLIENT_URL')}/im?token=${verifyToken}`,
           linkText: 'Verify',
           clientLink: this.config.get<string>('CLIENT_URL'),
         },
@@ -117,10 +113,7 @@ export class AuthenticationService {
         message: [{ type: 'common_error', text: 'Forbidden' }],
       });
 
-    const isRefreshTokensCompared = await compare(
-      refreshToken,
-      user.refresh_hash,
-    );
+    const isRefreshTokensCompared = await compare(refreshToken, user.refresh_hash);
     if (!isRefreshTokensCompared)
       throw new UnauthorizedException({
         message: [{ type: 'common_error', text: 'Unauthorized' }],
@@ -169,16 +162,44 @@ export class AuthenticationService {
       });
     }
     this.jwtService.verify(token, {
-      secret: this.config.get<string>('ACCESS_TOKEN_SECRET'),
+      secret: this.config.get<string>('VERIFY_TOKEN_SECRET'),
     });
     const userId = this.jwtService.decode(token).sub;
-    const isAlreadyConfirmed = (await this.usersService.findBy('id', userId))
-      .confirmed;
+    const isAlreadyConfirmed = (await this.usersService.findBy('id', userId)).confirmed;
     if (isAlreadyConfirmed) {
       throw new BadRequestException({
         message: [{ type: 'common_error', text: 'You are already confirmed' }],
       });
     }
     await this.usersService.updateConfirmed(userId, true);
+  }
+
+  async sendUserRecoverPasswordLink(email: string) {
+    const user = await this.usersService.findBy('email', email);
+    if (!user) {
+      throw new BadRequestException({
+        message: [{ type: 'invalid_email', text: 'There are no user with such email' }],
+      });
+    }
+    const recoverToken = this.jwtService.sign(
+      { sub: user.id },
+      {
+        secret: this.config.get<string>('RECOVER_TOKEN_SECRET'),
+        expiresIn: this.config.get<string>('RECOVER_TOKEN_EXPIRATION'),
+      },
+    );
+    await this.mailService.sendEmail({
+      name: 'recover.hbs',
+      data: {
+        to: email,
+        subject: 'Recover password',
+        context: {
+          text: 'You received this email because you forgot your password. Please click the link below for create new one.',
+          link: `${this.config.get<string>('CLIENT_URL')}/new-password?token=${recoverToken}`,
+          linkText: 'Create New Password',
+          clientLink: this.config.get<string>('CLIENT_URL'),
+        },
+      },
+    });
   }
 }

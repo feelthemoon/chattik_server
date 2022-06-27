@@ -5,13 +5,14 @@ import {
   UnauthorizedException,
   BadRequestException,
   ForbiddenException,
+  NotFoundException,
 } from '@nestjs/common';
 import { Response } from 'express';
 
-@Catch(BadRequestException, UnauthorizedException, ForbiddenException)
+@Catch(BadRequestException, UnauthorizedException, ForbiddenException, NotFoundException)
 export class HttpExceptionFilter implements ExceptionFilter {
   catch(
-    exception: ForbiddenException | UnauthorizedException | BadRequestException,
+    exception: ForbiddenException | UnauthorizedException | BadRequestException | NotFoundException,
     host: ArgumentsHost,
   ) {
     const ctx = host.switchToHttp();
