@@ -5,6 +5,9 @@ import { AuthenticationModule } from './modules/authentication/authentication.mo
 import { UsersModule } from './modules/users/users.module';
 import { UsersEntity } from './entities';
 import { RedisModule } from 'nestjs-redis';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { MailModule } from './modules/mail/mail.module';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
 @Module({
   imports: [
@@ -30,8 +33,33 @@ import { RedisModule } from 'nestjs-redis';
       port: parseInt(process.env.REDIS_PORT),
       db: parseInt(process.env.REDIS_DB),
     }),
+    MailerModule.forRoot({
+      transport: {
+        host: 'smtp.ethereal.email',
+        port: 587,
+        secure: false, // upgrade later with STARTTLS
+        auth: {
+          user: process.env.MAIL_USERNAME,
+          pass: process.env.MAIL_PASSWORD,
+        },
+      },
+      defaults: {
+        from: '"nest-modules" <modules@nestjs.com>',
+      },
+      template: {
+        dir: './src/modules/mail/templates',
+        adapter: new HandlebarsAdapter(undefined, {
+          inlineCssEnabled: true,
+          inlineCssOptions: { url: ' ', preserveMediaQueries: true },
+        }),
+        options: {
+          strict: true,
+        },
+      },
+    }),
     AuthenticationModule,
     UsersModule,
+    MailModule.register(),
   ],
   controllers: [],
   providers: [],

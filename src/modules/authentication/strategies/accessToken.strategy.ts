@@ -23,7 +23,9 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
     const redisClient = this.redisService.getClient('revoked_tokens');
     const isTokenRevoked = await redisClient.get(req.headers.authorization);
     if (isTokenRevoked) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException({
+        message: [{ type: 'common_error', text: 'Unauthorized' }],
+      });
     }
     return payload;
   }

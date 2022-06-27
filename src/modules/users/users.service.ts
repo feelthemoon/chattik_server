@@ -12,6 +12,7 @@ type UpdateFieldType =
   | 'refresh_hash'
   | 'name'
   | 'avatar';
+type AddSelectType = 'password' | 'refresh_hash';
 
 @Injectable()
 export class UsersService {
@@ -27,13 +28,12 @@ export class UsersService {
   findBy(
     field: FindFieldType,
     value: string | number,
-    selectPass = false,
-    selectRefreshHash = false,
+    addSelectField?: AddSelectType,
   ): Promise<UsersEntity | null> {
-    if (selectPass) {
+    if (addSelectField) {
       return this.usersRepository
         .createQueryBuilder('users')
-        .addSelect('users.password')
+        .addSelect(`users.${addSelectField}`)
         .where({ [field]: value })
         .getOne();
     }

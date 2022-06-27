@@ -5,6 +5,6 @@ export const GetCurrentUserId = createParamDecorator(
   (_: undefined, context: ExecutionContext): number => {
     const request = context.switchToHttp().getRequest();
     const jwt = new JwtService();
-    return jwt.decode(request.cookies['refresh_token']).sub;
+    return jwt.decode(request.cookies['Refresh']).sub;
   },
 );
