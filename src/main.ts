@@ -12,10 +12,8 @@ async function bootstrap() {
     credentials: true,
     allowedHeaders: 'Origin, Content-Type, X-Auth-Token',
     methods: 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
-    optionsSuccessStatus: 200
+    optionsSuccessStatus: 200,
   });
-  await app.listen(PORT, () =>
-    Logger.verbose(`APP HAS BEEN STARTED AT PORT ${PORT}`),
-  );
+  await app.listen(PORT, () => Logger.verbose(`APP HAS BEEN STARTED AT PORT ${PORT}`));
 }
 bootstrap();

@@ -8,10 +8,7 @@ import { Request } from 'express';
 
 @Injectable()
 export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(
-    private readonly config: ConfigService,
-    private readonly redisService: RedisService,
-  ) {
+  constructor(private readonly config: ConfigService, private readonly redisService: RedisService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: config.get<string>('ACCESS_TOKEN_SECRET'),
@@ -23,7 +20,9 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
     const redisClient = this.redisService.getClient('revoked_tokens');
     const isTokenRevoked = await redisClient.get(req.headers.authorization);
     if (isTokenRevoked) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException({
+        message: [{ type: 'common_error', text: 'Unauthorized' }],
+      });
     }
     return payload;
   }

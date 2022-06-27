@@ -1,9 +1,4 @@
-import {
-  Column,
-  PrimaryGeneratedColumn,
-  Entity,
-  CreateDateColumn,
-} from 'typeorm';
+import { Column, PrimaryGeneratedColumn, Entity, CreateDateColumn } from 'typeorm';
 import { Exclude } from 'class-transformer';
 
 @Entity('users')
@@ -29,7 +24,7 @@ export class UsersEntity {
   @Column({ type: 'boolean', nullable: false, default: false })
   confirmed: boolean;
 
-  @Column({ type: 'date', default: new Date(), nullable: false })
+  @Column({ type: 'timestamp', default: new Date(), nullable: false })
   last_seen: Date;
 
   @Column({ type: 'varchar', nullable: true, select: false })
