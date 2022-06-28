@@ -14,7 +14,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
   catch(
     exception: ForbiddenException | UnauthorizedException | BadRequestException | NotFoundException,
     host: ArgumentsHost,
-  ) {
+  ): any {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const status = exception.getStatus();

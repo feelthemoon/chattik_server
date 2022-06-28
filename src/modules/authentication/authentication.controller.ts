@@ -11,7 +11,7 @@ import {
   ValidationPipe,
   Headers,
   Query,
-  UseFilters,
+  BadRequestException,
 } from '@nestjs/common';
 import { GetCurrentUserIdFromRefreshToken, Public } from '../../common/decorators';
 import { Request, Response } from 'express';
@@ -19,11 +19,9 @@ import { SigninDto, SignupDto } from './authentication.dto';
 import { AuthenticationService } from './authentication.service';
 import { RtGuard, VerifyTokenGuard } from '../../common/guards';
 import { AtGuard } from '../../common/guards';
-import { TokenExceptionFilter } from '../../common/filters';
-import { HttpExceptionFilter } from '../../common/filters';
+import { Recaptcha, RecaptchaResult } from '@nestlab/google-recaptcha';
+import { GoogleRecaptchaValidationResult } from '@nestlab/google-recaptcha/interfaces/google-recaptcha-validation-result';
 
-@UsePipes(new ValidationPipe({ transform: true }))
-@UseFilters(HttpExceptionFilter, TokenExceptionFilter)
 @Controller('api/auth')
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
@@ -31,7 +29,17 @@ export class AuthenticationController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('signin')
-  async signin(@Body() signinDto: SigninDto, @Res() response: Response) {
+  @Recaptcha({ response: (req) => req.body.recaptchaToken, action: 'signin', score: 0.8 })
+  async signin(
+    @Body() signinDto: SigninDto,
+    @RecaptchaResult() recaptchaResult: GoogleRecaptchaValidationResult,
+    @Res() response: Response,
+  ) {
+    if (recaptchaResult.errors.length) {
+      throw new BadRequestException({
+        message: [{ type: 'common_error', text: 'Recaptcha error' }],
+      });
+    }
     const tokens = await this.authenticationService.signin(signinDto);
     response.setHeader(
       'Set-Cookie',
@@ -45,7 +53,17 @@ export class AuthenticationController {
   @Public()
   @HttpCode(HttpStatus.CREATED)
   @Post('signup')
-  async signup(@Body() signupDto: SignupDto, @Res() response: Response) {
+  @Recaptcha({ response: (req) => req.body.recaptchaToken, action: 'signup', score: 0.8 })
+  async signup(
+    @Body() signupDto: SignupDto,
+    @RecaptchaResult() recaptchaResult: GoogleRecaptchaValidationResult,
+    @Res() response: Response,
+  ) {
+    if (recaptchaResult.errors.length) {
+      throw new BadRequestException({
+        message: [{ type: 'common_error', text: 'Recaptcha error' }],
+      });
+    }
     const tokens = await this.authenticationService.signup(signupDto);
     response.setHeader(
       'Set-Cookie',
@@ -96,7 +114,17 @@ export class AuthenticationController {
   @Public()
   @Post('recover')
   @HttpCode(HttpStatus.OK)
-  async recoverPassword(@Body() reqBody: { email: string }, @Res() response: Response) {
+  @Recaptcha({ response: (req) => req.body.recaptchaToken, action: 'recoverPassword', score: 0.8 })
+  async recoverPassword(
+    @Body() reqBody: { email: string },
+    @RecaptchaResult() recaptchaResult: GoogleRecaptchaValidationResult,
+    @Res() response: Response,
+  ) {
+    if (recaptchaResult.errors.length) {
+      throw new BadRequestException({
+        message: [{ type: 'common_error', text: 'Recaptcha error' }],
+      });
+    }
     await this.authenticationService.sendUserRecoverPasswordLink(reqBody.email);
     response.send();
   }

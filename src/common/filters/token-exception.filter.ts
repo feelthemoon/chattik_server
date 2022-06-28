@@ -4,7 +4,7 @@ import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 
 @Catch(TokenExpiredError, JsonWebTokenError)
 export class TokenExceptionFilter implements ExceptionFilter {
-  catch(exception: TokenExpiredError | JsonWebTokenError, host: ArgumentsHost) {
+  catch(exception: TokenExpiredError | JsonWebTokenError, host: ArgumentsHost): any {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const status = 401;

@@ -17,7 +17,6 @@ import { GetCurrentUserIdFromRecoverToken, Public } from '../../common/decorator
 import { AtGuard } from '../../common/guards';
 
 @UseGuards(AtGuard, RecoverTokenGuard)
-@UsePipes(new ValidationPipe({ transform: true }))
 @Controller('api/users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

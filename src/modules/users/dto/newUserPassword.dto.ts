@@ -9,4 +9,7 @@ export class NewUserPasswordDto {
   @IsString()
   @Match('newPassword')
   passwordConfirm: string;
+
+  @IsString()
+  recaptchaToken: string;
 }
