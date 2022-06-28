@@ -8,6 +8,9 @@ export class SigninDto {
   @IsString()
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,255})/)
   password: string;
+
+  @IsString()
+  recaptchaToken: string;
 }
 
 export class SignupDto extends SigninDto {

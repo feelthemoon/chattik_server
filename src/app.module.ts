@@ -8,6 +8,7 @@ import { RedisModule } from 'nestjs-redis';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { MailModule } from './modules/mail/mail.module';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { GoogleRecaptchaModule, GoogleRecaptchaNetwork } from '@nestlab/google-recaptcha';
 
 @Module({
   imports: [
@@ -56,6 +57,13 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
           strict: true,
         },
       },
+    }),
+    GoogleRecaptchaModule.forRoot({
+      secretKey: process.env.GOOGLE_RECAPTCHA_SECRET_KEY,
+      response: (req) => req.body.recaptchaToken,
+      // skipIf: process.env.NODE_ENV !== 'production',
+      network: GoogleRecaptchaNetwork.Recaptcha,
+      actions: ['signin', 'signup', 'recoverPassword'],
     }),
     AuthenticationModule,
     UsersModule,
