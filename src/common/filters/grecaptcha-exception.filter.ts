@@ -13,7 +13,7 @@ export class GoogleRecaptchaFilter implements ExceptionFilter {
     response.status(400).send({
       message: [
         {
-          type: 'common_error',
+          type: 'captcha_error',
           text: exception.message,
         },
       ],
