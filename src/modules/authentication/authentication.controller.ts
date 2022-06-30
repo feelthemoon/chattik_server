@@ -7,8 +7,6 @@ import {
   Req,
   Res,
   UseGuards,
-  UsePipes,
-  ValidationPipe,
   Headers,
   Query,
   BadRequestException,
