@@ -10,12 +10,13 @@ import {
   Headers,
   Query,
   BadRequestException,
+  Get,
 } from '@nestjs/common';
 import { GetCurrentUserIdFromRefreshToken, Public } from '../../common/decorators';
 import { Request, Response } from 'express';
 import { SigninDto, SignupDto } from './authentication.dto';
 import { AuthenticationService } from './authentication.service';
-import { RtGuard, VerifyTokenGuard } from '../../common/guards';
+import { RecoverTokenGuard, RtGuard, VerifyTokenGuard } from '../../common/guards';
 import { AtGuard } from '../../common/guards';
 import { Recaptcha, RecaptchaResult } from '@nestlab/google-recaptcha';
 import { GoogleRecaptchaValidationResult } from '@nestlab/google-recaptcha/interfaces/google-recaptcha-validation-result';
@@ -125,5 +126,13 @@ export class AuthenticationController {
     }
     await this.authenticationService.sendUserRecoverPasswordLink(reqBody.email);
     response.send();
+  }
+
+  @UseGuards(RecoverTokenGuard)
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Get('verify-recover')
+  verifyRecover() {
+    return;
   }
 }
