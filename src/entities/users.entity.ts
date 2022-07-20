@@ -1,5 +1,15 @@
-import { Column, PrimaryGeneratedColumn, Entity, CreateDateColumn } from 'typeorm';
+import {
+  Column,
+  PrimaryGeneratedColumn,
+  Entity,
+  CreateDateColumn,
+  OneToMany,
+  ManyToMany,
+  JoinTable,
+} from 'typeorm';
 import { Exclude } from 'class-transformer';
+import { MessageEntity } from './message.entity';
+import { DialogEntity } from './dialog.entity';
 
 @Entity('users')
 export class UsersEntity {
@@ -33,4 +43,11 @@ export class UsersEntity {
 
   @CreateDateColumn()
   created_at: Date;
+
+  @OneToMany(() => MessageEntity, (message: MessageEntity) => message.user, { cascade: true })
+  messages: MessageEntity[];
+
+  @ManyToMany(() => DialogEntity, (dialog: DialogEntity) => dialog.users, { cascade: true })
+  @JoinTable({ name: 'user_dialogs', inverseJoinColumn: { name: 'dialog_id' }, joinColumn: { name: 'user_id' } })
+  dialogs: DialogEntity[];
 }

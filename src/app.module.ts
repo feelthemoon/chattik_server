@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthenticationModule } from './modules/authentication/authentication.module';
 import { UsersModule } from './modules/users/users.module';
-import { UsersEntity } from './entities';
+import { AttachmentEntity, DialogEntity, MessageEntity, UsersEntity } from './entities';
 import { RedisModule } from 'nestjs-redis';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { MailModule } from './modules/mail/mail.module';
@@ -23,7 +23,7 @@ import { GoogleRecaptchaModule, GoogleRecaptchaNetwork } from '@nestlab/google-r
       password: process.env.PG_PASSWORD,
       database: process.env.PG_DATABASE,
       host: process.env.PG_HOST,
-      entities: [UsersEntity],
+      entities: [UsersEntity, DialogEntity, MessageEntity, AttachmentEntity],
       synchronize: true,
       logger: 'file',
       logging: true,
