@@ -48,6 +48,10 @@ export class UsersEntity {
   messages: MessageEntity[];
 
   @ManyToMany(() => DialogEntity, (dialog: DialogEntity) => dialog.users, { cascade: true })
-  @JoinTable({ name: 'user_dialogs', inverseJoinColumn: { name: 'dialog_id' }, joinColumn: { name: 'user_id' } })
+  @JoinTable({
+    name: 'user_dialogs',
+    inverseJoinColumn: { name: 'dialog_id' },
+    joinColumn: { name: 'user_id' },
+  })
   dialogs: DialogEntity[];
 }
