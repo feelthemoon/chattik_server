@@ -1,7 +1,13 @@
-import { Column, PrimaryGeneratedColumn, Entity, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Column,
+  PrimaryGeneratedColumn,
+  Entity,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { MessageEntity } from './message.entity';
 import { AttachmentType } from './types';
-
 
 @Entity('attachments')
 export class AttachmentEntity {
@@ -18,7 +24,7 @@ export class AttachmentEntity {
   size: string;
 
   @Column({ type: 'varchar', nullable: false })
-  src: string
+  src: string;
 
   @CreateDateColumn()
   created_at: Date;

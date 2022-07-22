@@ -5,11 +5,11 @@ export enum MessageType {
 }
 export enum AttachmentType {
   IMAGE = 'image',
-  TEXT = 'text' ,
-  WORD = 'word' ,
+  TEXT = 'text',
+  WORD = 'word',
   PDF = 'pdf',
   EXCEL = 'excel',
   PPT = 'ppt',
   ZIP = 'zip',
-  MARKDOWN ='markdown',
+  MARKDOWN = 'markdown',
 }

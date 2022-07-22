@@ -14,5 +14,5 @@ export class DialogEntity {
   messages: MessageEntity[];
 
   @CreateDateColumn()
-  created_at: Date
+  created_at: Date;
 }

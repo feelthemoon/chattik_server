@@ -24,24 +24,24 @@ export class HttpExceptionFilter implements ExceptionFilter {
       switch (exception.getStatus()) {
         case 401:
           customMessage.push({
-            type: "common_error",
-            text: "Unauthorized"
+            type: 'common_error',
+            text: 'Unauthorized',
           });
           break;
         case 403:
           customMessage.push({
-            type: "common_error",
-            text: "Forbidden"
+            type: 'common_error',
+            text: 'Forbidden',
           });
           break;
         case 404:
           customMessage.push({
-            type: "common_error",
-            text: "Not Found"
+            type: 'common_error',
+            text: 'Not Found',
           });
           break;
         default:
-          customMessage.push( { type: 'unknown', text: 'Unknown error. Please try it again.' })
+          customMessage.push({ type: 'unknown', text: 'Unknown error. Please try it again.' });
       }
     }
     response.status(status).json({

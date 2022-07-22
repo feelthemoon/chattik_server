@@ -32,11 +32,11 @@ export class UsersService {
     return this.usersRepository.findOneBy({ [field]: value });
   }
 
-  findAllBy(
-    field: FindFieldType,
-    value: string | number
-  ): Promise<UsersEntity[]> {
-    return this.usersRepository.find({ where: [{ [field]: Like(`${value}%`) }, { confirmed: true }], cache: 1000 * 60 * 60 });
+  findAllBy(field: FindFieldType, value: string | number): Promise<UsersEntity[]> {
+    return this.usersRepository.find({
+      where: { [field]: Like(`${value}%`), confirmed: true },
+      cache: 1000 * 60 * 60,
+    });
   }
 
   async updateOne(
