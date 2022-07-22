@@ -27,6 +27,9 @@ import { GoogleRecaptchaModule, GoogleRecaptchaNetwork } from '@nestlab/google-r
       synchronize: true,
       logger: 'file',
       logging: true,
+      cache: {
+        duration: 1000 * 60,
+      },
     }),
     RedisModule.register({
       name: 'revoked_tokens',

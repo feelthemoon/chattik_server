@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from '../../entities';
 import { SignupDto } from '../authentication/authentication.dto';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { hash } from 'bcrypt';
 import { AddSelectType, FindFieldType, UpdateFieldType } from './types';
 
@@ -30,6 +30,13 @@ export class UsersService {
         .getOne();
     }
     return this.usersRepository.findOneBy({ [field]: value });
+  }
+
+  findAllBy(
+    field: FindFieldType,
+    value: string | number
+  ): Promise<UsersEntity[]> {
+    return this.usersRepository.find({ where: [{ [field]: Like(`${value}%`) }, { confirmed: true }], cache: 1000 * 60 * 60 });
   }
 
   async updateOne(
