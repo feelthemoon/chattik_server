@@ -61,7 +61,7 @@ import { GoogleRecaptchaModule, GoogleRecaptchaNetwork } from '@nestlab/google-r
     GoogleRecaptchaModule.forRoot({
       secretKey: process.env.GOOGLE_RECAPTCHA_SECRET_KEY,
       response: (req) => req.body.recaptchaToken,
-      // skipIf: process.env.NODE_ENV !== 'production',
+      skipIf: process.env.NODE_ENV !== 'production',
       network: GoogleRecaptchaNetwork.Recaptcha,
       actions: ['signin', 'signup', 'recoverPassword', 'newPassword'],
       score: 0.8,
