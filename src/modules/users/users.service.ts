@@ -14,7 +14,10 @@ export class UsersService {
   ) {}
 
   create(user: SignupDto): Promise<UsersEntity> {
-    return this.usersRepository.save(user);
+    return this.usersRepository.save({
+      ...user,
+      avatar: `gradient-${Math.floor(Math.random() * 8 + 1)}`,
+    });
   }
 
   findBy(
