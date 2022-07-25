@@ -14,7 +14,11 @@ import { UsersService } from './users.service';
 import { RecoverTokenGuard } from '../../common/guards';
 import { NewUserPasswordDto } from './dto';
 import { Response } from 'express';
-import { GetCurrentUserIdFromRecoverToken, Public } from '../../common/decorators';
+import {
+  GetCurrentUserIdFromAccessToken,
+  GetCurrentUserIdFromRecoverToken,
+  Public,
+} from '../../common/decorators';
 import { AtGuard } from '../../common/guards';
 import { Recaptcha, RecaptchaResult } from '@nestlab/google-recaptcha';
 import { GoogleRecaptchaValidationResult } from '@nestlab/google-recaptcha/interfaces/google-recaptcha-validation-result';
@@ -49,5 +53,12 @@ export class UsersController {
   async searchUsers(@Query('s') username: string, @Res() response: Response) {
     const users = await this.usersService.findAllBy('username', username);
     response.send(users);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('me')
+  async getMe(@GetCurrentUserIdFromAccessToken() userId: number, @Res() response: Response) {
+    const userInfo = await this.usersService.findBy('id', userId);
+    response.send(userInfo);
   }
 }
