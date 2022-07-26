@@ -63,13 +63,7 @@ export class AuthenticationController {
         message: [{ type: 'common_error', text: 'Recaptcha error' }],
       });
     }
-    const tokens = await this.authenticationService.signup(signupDto);
-    response.setHeader(
-      'Set-Cookie',
-      `Refresh=${tokens.refresh_token}; HttpOnly; Path=/; Max-Age=10d`,
-    );
-    response.setHeader('Access-Control-Expose-Headers', 'Authorization');
-    response.setHeader('Authorization', `Bearer ${tokens.access_token}`);
+    await this.authenticationService.signup(signupDto);
     response.send();
   }
 

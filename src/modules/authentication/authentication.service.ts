@@ -25,9 +25,16 @@ export class AuthenticationService {
 
   async signin(signDto: SigninDto): Promise<Tokens> {
     const user = await this.usersService.findBy('email', signDto.email, 'password');
+
     if (!user) {
       throw new BadRequestException({
         message: [{ type: 'invalid_data', text: 'Invalid email or password' }],
+      });
+    }
+
+    if (!user.confirmed) {
+      throw new ForbiddenException({
+        message: [{ type: 'common_error', text: 'You have to confirm your profile!' }],
       });
     }
     const isPasswordCompared = await compare(signDto.password, user.password);
@@ -44,7 +51,7 @@ export class AuthenticationService {
     return tokens;
   }
 
-  async signup(signupDto: SignupDto): Promise<Tokens> {
+  async signup(signupDto: SignupDto): Promise<void> {
     const existingErrors = [];
 
     const isEmailInUse = await this.usersService.findBy('email', signupDto.email);
@@ -70,10 +77,6 @@ export class AuthenticationService {
       password: hashPassword,
     });
 
-    const tokens = await this.getTokens(user.id);
-    const refreshHash = await hash(tokens.refresh_token, 10);
-    await this.usersService.updateOne(user.id, 'refresh_hash', refreshHash);
-
     const verifyToken = this.jwtService.sign(
       { sub: user.id },
       {
@@ -89,13 +92,13 @@ export class AuthenticationService {
         subject: 'Verify account',
         context: {
           text: 'Confirm your registration by verifying your account',
-          link: `${this.config.get<string>('CLIENT_URL')}/im?token=${verifyToken}`,
+          link: `${this.config.get<string>('CLIENT_URL')}/confirm?token=${verifyToken}`,
           linkText: 'Verify',
           clientLink: this.config.get<string>('CLIENT_URL'),
         },
       },
     });
-    return tokens;
+    return;
   }
 
   async logout(userId: number, accessToken: string): Promise<boolean> {
