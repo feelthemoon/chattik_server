@@ -109,8 +109,8 @@ export class AuthenticationService {
   async refreshToken(userId: number, refreshToken: string) {
     const user = await this.usersService.findBy('id', userId, 'refresh_hash');
     if (!user.refresh_hash)
-      throw new ForbiddenException({
-        message: [{ type: 'common_error', text: 'Forbidden' }],
+      throw new UnauthorizedException({
+        message: [{ type: 'common_error', text: 'Unauthorized' }],
       });
 
     const isRefreshTokensCompared = await compare(refreshToken, user.refresh_hash);
