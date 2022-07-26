@@ -10,7 +10,7 @@ export class RtGuard extends AuthGuard('jwt-refresh') {
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const request: Request = context.switchToHttp().getRequest();
     if (request.cookies['Refresh']) {
-      return true;
+      return super.canActivate(context);
     }
     throw new UnauthorizedException({
       message: [{ type: 'common_error', text: 'Unauthorized' }],
