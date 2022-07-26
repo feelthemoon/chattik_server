@@ -16,13 +16,6 @@ export class VerifyTokenStrategy extends PassportStrategy(Strategy, 'jwt-verify'
   }
 
   validate(req: Request, payload: JwtPayload): JwtPayload {
-    const recoverToken = req.query.token;
-
-    if (!recoverToken)
-      throw new ForbiddenException({
-        message: [{ type: 'common_error', text: 'Verify token malformed' }],
-      });
-
     return payload;
   }
 }
