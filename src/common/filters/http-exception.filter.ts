@@ -20,8 +20,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     let customMessage = [];
 
+    if (status === 401) {
+      response.setHeader(
+        'Set-Cookie',
+        'Refresh=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT',
+      );
+    }
+
     if (!Array.isArray(exception.getResponse()['message'])) {
-      switch (exception.getStatus()) {
+      switch (status) {
         case 401:
           customMessage.push({
             type: 'common_error',
