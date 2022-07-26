@@ -22,11 +22,15 @@ import {
 import { AtGuard } from '../../common/guards';
 import { Recaptcha, RecaptchaResult } from '@nestlab/google-recaptcha';
 import { GoogleRecaptchaValidationResult } from '@nestlab/google-recaptcha/interfaces/google-recaptcha-validation-result';
+import { RedisService } from 'nestjs-redis';
 
 @UseGuards(AtGuard)
 @Controller('api/users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly redisService: RedisService,
+  ) {}
 
   @UseGuards(RecoverTokenGuard)
   @Public()
@@ -37,6 +41,7 @@ export class UsersController {
     @Body() reqBody: NewUserPasswordDto,
     @RecaptchaResult() recaptchaResult: GoogleRecaptchaValidationResult,
     @GetCurrentUserIdFromRecoverToken() userId: number,
+    @Query('token') recoverToken: string,
     @Res() response: Response,
   ) {
     if (recaptchaResult?.errors.length) {
@@ -45,6 +50,8 @@ export class UsersController {
       });
     }
     await this.usersService.updateOne(userId, 'password', reqBody.newPassword);
+    const redisClient = this.redisService.getClient('revoked_tokens');
+    await redisClient.append(recoverToken, 'true');
     response.send();
   }
 

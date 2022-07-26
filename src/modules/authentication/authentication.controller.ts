@@ -113,7 +113,7 @@ export class AuthenticationController {
     @RecaptchaResult() recaptchaResult: GoogleRecaptchaValidationResult,
     @Res() response: Response,
   ) {
-    if (recaptchaResult.errors.length) {
+    if (recaptchaResult?.errors.length) {
       throw new BadRequestException({
         message: [{ type: 'common_error', text: 'Recaptcha error' }],
       });
